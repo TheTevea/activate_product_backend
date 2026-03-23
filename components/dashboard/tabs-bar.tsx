@@ -105,7 +105,11 @@ export function TabsBar() {
                 onClick={() => handleTabClick(tab.id, tab.url)}
               >
                 {/* Tab Icon/Number */}
-                <span className="text-xs font-semibold text-neutral-500 group-hover/tab:text-neutral-400">
+                <span
+                  className={`text-xs font-semibold ${
+                    activeTabId === tab.id ? 'text-orange-500' : 'text-neutral-500 group-hover/tab:text-neutral-400'
+                  }`}
+                >
                   {index + 1}
                 </span>
                 

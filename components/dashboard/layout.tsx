@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ChevronRight, Monitor, Settings, Users, Package, ShoppingCart, CreditCard, Zap, BarChart3, Bell, RefreshCw, LogOut, Tag, Key, ScrollText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -17,7 +17,12 @@ interface LayoutProps {
 
 export function DashboardLayout({ children, currentPage }: LayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [currentDateTime, setCurrentDateTime] = useState('')
   const { openTab } = useTabOpener()
+
+  useEffect(() => {
+    setCurrentDateTime(new Date().toLocaleString())
+  }, [])
 
   const menuItems = [
     { id: 'dashboard', icon: Monitor, label: 'Dashboard', href: '/' },
@@ -114,7 +119,7 @@ export function DashboardLayout({ children, currentPage }: LayoutProps) {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-xs text-neutral-500 hidden md:block">{new Date().toLocaleString()}</div>
+            <div className="text-xs text-neutral-500 hidden md:block">{currentDateTime}</div>
             <ThemeToggle />
             <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-orange-500">
               <Bell className="w-4 h-4" />
