@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { mockCurrentUser } from '@/lib/auth'
 import { TabsBar } from './tabs-bar'
 import { KeyboardShortcuts } from './keyboard-shortcuts'
+import { ThemeToggle } from './theme-toggle'
 import { useTabOpener } from '@/hooks/use-tab-opener'
 
 interface LayoutProps {
@@ -114,6 +115,7 @@ export function DashboardLayout({ children, currentPage }: LayoutProps) {
           </div>
           <div className="flex items-center gap-4">
             <div className="text-xs text-neutral-500 hidden md:block">{new Date().toLocaleString()}</div>
+            <ThemeToggle />
             <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-orange-500">
               <Bell className="w-4 h-4" />
             </Button>
