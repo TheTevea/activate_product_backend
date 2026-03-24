@@ -5,6 +5,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { TabsProvider } from "@/components/dashboard/tabs-context"
+import { AuthGuard } from "@/components/auth/auth-guard"
 
 const geistMono = GeistMono({ subsets: ["latin"] })
 
@@ -23,9 +24,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistMono.className} bg-black text-white antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
-          <TabsProvider>
-            {children}
-          </TabsProvider>
+          <AuthGuard>
+            <TabsProvider>
+              {children}
+            </TabsProvider>
+          </AuthGuard>
           <Toaster />
         </ThemeProvider>
       </body>

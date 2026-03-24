@@ -25,7 +25,10 @@ export function TabsBar() {
 
     const handleTabClick = (tabId: string, url: string) => {
       setActiveTab(tabId)
-      router.push(url)
+      router.prefetch(url)
+      if (pathname !== url) {
+        router.push(url)
+      }
     }
 
     const handleScroll = (direction: 'left' | 'right') => {

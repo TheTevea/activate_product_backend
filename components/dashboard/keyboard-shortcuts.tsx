@@ -2,11 +2,12 @@
 
 import { useEffect } from 'react'
 import { useTabs } from './tabs-context'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
 export function KeyboardShortcuts() {
   const { tabs, activeTabId, closeTab, closeAllTabs, setActiveTab } = useTabs()
   const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -37,7 +38,10 @@ export function KeyboardShortcuts() {
           const nextTab = tabs[nextIndex]
           if (nextTab) {
             setActiveTab(nextTab.id)
-            router.push(nextTab.url)
+            router.prefetch(nextTab.url)
+            if (pathname !== nextTab.url) {
+              router.push(nextTab.url)
+            }
           }
         }
       }
@@ -51,7 +55,10 @@ export function KeyboardShortcuts() {
           const prevTab = tabs[prevIndex]
           if (prevTab) {
             setActiveTab(prevTab.id)
-            router.push(prevTab.url)
+            router.prefetch(prevTab.url)
+            if (pathname !== prevTab.url) {
+              router.push(prevTab.url)
+            }
           }
         }
       }
@@ -59,7 +66,7 @@ export function KeyboardShortcuts() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [tabs, activeTabId, closeTab, closeAllTabs, setActiveTab, router])
+  }, [tabs, activeTabId, closeTab, closeAllTabs, setActiveTab, router, pathname])
 
   return null
 }

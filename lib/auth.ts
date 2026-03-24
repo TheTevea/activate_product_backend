@@ -48,3 +48,30 @@ export const mockAuthSession: AuthSession = {
   token: 'mock_token_xyz123',
   expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
 }
+
+export const MOCK_AUTH_STORAGE_KEY = 'dashboard_auth_token'
+export const DASHBOARD_TABS_STORAGE_KEY = 'dashboard_tabs'
+
+function canUseStorage() {
+  return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined'
+}
+
+export function hasMockAuthSession(): boolean {
+  if (!canUseStorage()) return false
+  return Boolean(window.localStorage.getItem(MOCK_AUTH_STORAGE_KEY))
+}
+
+export function setMockAuthSession(): void {
+  if (!canUseStorage()) return
+  window.localStorage.setItem(MOCK_AUTH_STORAGE_KEY, mockAuthSession.token)
+}
+
+export function clearMockAuthSession(): void {
+  if (!canUseStorage()) return
+  window.localStorage.removeItem(MOCK_AUTH_STORAGE_KEY)
+}
+
+export function clearDashboardWorkspaceState(): void {
+  if (!canUseStorage()) return
+  window.localStorage.removeItem(DASHBOARD_TABS_STORAGE_KEY)
+}

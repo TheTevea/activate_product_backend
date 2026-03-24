@@ -1,10 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { ChevronRight, Monitor, Settings, Users, Package, ShoppingCart, CreditCard, Zap, BarChart3, Bell, RefreshCw, LogOut, Tag, Key, ScrollText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { mockCurrentUser } from '@/lib/auth'
+import { clearDashboardWorkspaceState, clearMockAuthSession, mockCurrentUser } from '@/lib/auth'
 import { TabsBar } from './tabs-bar'
 import { KeyboardShortcuts } from './keyboard-shortcuts'
 import { ThemeToggle } from './theme-toggle'
@@ -16,6 +17,7 @@ interface LayoutProps {
 }
 
 export function DashboardLayout({ children, currentPage }: LayoutProps) {
+  const router = useRouter()
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [currentDateTime, setCurrentDateTime] = useState('')
   const { openTab } = useTabOpener()
@@ -39,6 +41,12 @@ export function DashboardLayout({ children, currentPage }: LayoutProps) {
     { id: 'logs', icon: Settings, label: 'Logs', href: '/logs' },
     { id: 'settings', icon: Settings, label: 'Settings', href: '/settings' },
   ]
+
+  const handleLogout = () => {
+    clearMockAuthSession()
+    clearDashboardWorkspaceState()
+    router.replace('/login')
+  }
 
   return (
     <div className="flex h-screen">
@@ -127,7 +135,14 @@ export function DashboardLayout({ children, currentPage }: LayoutProps) {
             <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-orange-500">
               <RefreshCw className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-orange-500">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-neutral-400 hover:text-orange-500"
+              onClick={handleLogout}
+              aria-label="Log out"
+              title="Log out"
+            >
               <LogOut className="w-4 h-4" />
             </Button>
           </div>

@@ -50,18 +50,21 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
   // Persist tabs to localStorage whenever they change
   useEffect(() => {
     if (isLoading) return
-    try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({
-          tabs,
-          activeTabId,
-          timestamp: new Date().toISOString(),
-        })
-      )
-    } catch (error) {
-      console.error('[v0] Failed to save tabs to localStorage:', error)
-    }
+    const persistTimer = window.setTimeout(() => {
+      try {
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify({
+            tabs,
+            activeTabId,
+          })
+        )
+      } catch (error) {
+        console.error('[v0] Failed to save tabs to localStorage:', error)
+      }
+    }, 120)
+
+    return () => window.clearTimeout(persistTimer)
   }, [tabs, activeTabId, isLoading])
 
   const addTab = useCallback((newTab: TabItem) => {
@@ -110,13 +113,12 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const setActiveTabSafe = useCallback((tabId: string) => {
-    setTabs(prevTabs => {
-      if (prevTabs.find(t => t.id === tabId)) {
-        setActiveTabId(tabId)
-      }
-      return prevTabs
+    setActiveTabId(prevActiveTabId => {
+      if (prevActiveTabId === tabId) return prevActiveTabId
+      if (!tabs.some(t => t.id === tabId)) return prevActiveTabId
+      return tabId
     })
-  }, [])
+  }, [tabs])
 
   return (
     <TabsContext.Provider

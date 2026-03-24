@@ -1,9 +1,10 @@
 import { useTabs } from '@/components/dashboard/tabs-context'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useCallback } from 'react'
 
 export function useTabOpener() {
   const router = useRouter()
+  const pathname = usePathname()
   const { addTab } = useTabs()
 
   const getTabId = useCallback((type: string, url: string) => {
@@ -14,15 +15,18 @@ export function useTabOpener() {
   const openTab = useCallback(
     (title: string, url: string, type: 'order' | 'user' | 'product' | 'coupon' | 'payment' | 'feedback' | 'report' | 'dashboard' | 'module') => {
       const tabId = getTabId(type, url)
+      router.prefetch(url)
       addTab({
         id: tabId,
         title,
         type,
         url,
       })
-      router.push(url)
+      if (pathname !== url) {
+        router.push(url)
+      }
     },
-    [addTab, router, getTabId]
+    [addTab, router, pathname, getTabId]
   )
 
   return { openTab }
