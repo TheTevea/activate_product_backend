@@ -18,6 +18,7 @@ interface TabsContextType {
   closeOtherTabs: (tabId: string) => void
   closeAllTabs: () => void
   setActiveTab: (tabId: string) => void
+  reorderTabs: (fromIndex: number, toIndex: number) => void
   maxTabs: number
   isLoading: boolean
 }
@@ -112,6 +113,26 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
     setActiveTabId(null)
   }, [])
 
+  const reorderTabs = useCallback((fromIndex: number, toIndex: number) => {
+    setTabs(prevTabs => {
+      if (fromIndex === toIndex) return prevTabs
+      if (
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= prevTabs.length ||
+        toIndex >= prevTabs.length
+      ) {
+        return prevTabs
+      }
+
+      const updatedTabs = [...prevTabs]
+      const [movedTab] = updatedTabs.splice(fromIndex, 1)
+      if (!movedTab) return prevTabs
+      updatedTabs.splice(toIndex, 0, movedTab)
+      return updatedTabs
+    })
+  }, [])
+
   const setActiveTabSafe = useCallback((tabId: string) => {
     setActiveTabId(prevActiveTabId => {
       if (prevActiveTabId === tabId) return prevActiveTabId
@@ -130,6 +151,7 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
         closeOtherTabs,
         closeAllTabs,
         setActiveTab: setActiveTabSafe,
+        reorderTabs,
         maxTabs: MAX_TABS,
         isLoading,
       }}
@@ -150,6 +172,7 @@ export function useTabs() {
       closeOtherTabs: () => {},
       closeAllTabs: () => {},
       setActiveTab: () => {},
+      reorderTabs: () => {},
       maxTabs: 20,
       isLoading: false,
     }

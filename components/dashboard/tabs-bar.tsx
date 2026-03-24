@@ -10,9 +10,11 @@ export function TabsBar() {
   try {
     const router = useRouter()
     const pathname = usePathname()
-    const { tabs, activeTabId, closeTab, setActiveTab, closeOtherTabs, closeAllTabs, maxTabs } = useTabs()
+    const { tabs, activeTabId, closeTab, setActiveTab, closeOtherTabs, closeAllTabs, reorderTabs, maxTabs } = useTabs()
     const [contextMenuTab, setContextMenuTab] = useState<string | null>(null)
     const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 })
+    const [draggedTabId, setDraggedTabId] = useState<string | null>(null)
+    const [dragOverTabId, setDragOverTabId] = useState<string | null>(null)
     const containerRef = useRef<HTMLDivElement>(null)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
 
@@ -42,6 +44,16 @@ export function TabsBar() {
 
     const closeContextMenu = () => {
       setContextMenuTab(null)
+    }
+
+    const handleMoveTab = (tabId: string, direction: 'left' | 'right') => {
+      const currentIndex = tabs.findIndex(t => t.id === tabId)
+      if (currentIndex === -1) return
+
+      const targetIndex = direction === 'left' ? currentIndex - 1 : currentIndex + 1
+      if (targetIndex < 0 || targetIndex >= tabs.length) return
+
+      reorderTabs(currentIndex, targetIndex)
     }
 
     // Auto-sync active tab with current pathname
@@ -100,11 +112,44 @@ export function TabsBar() {
               <div
                 key={tab.id}
                 onContextMenu={(e) => handleContextMenu(e, tab.id)}
+                draggable
+                onDragStart={(e) => {
+                  setDraggedTabId(tab.id)
+                  e.dataTransfer.effectAllowed = 'move'
+                  e.dataTransfer.setData('text/plain', tab.id)
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault()
+                  if (draggedTabId && draggedTabId !== tab.id) {
+                    setDragOverTabId(tab.id)
+                  }
+                }}
+                onDragLeave={() => {
+                  if (dragOverTabId === tab.id) {
+                    setDragOverTabId(null)
+                  }
+                }}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  const sourceId = draggedTabId || e.dataTransfer.getData('text/plain')
+                  if (!sourceId || sourceId === tab.id) return
+
+                  const fromIndex = tabs.findIndex(t => t.id === sourceId)
+                  const toIndex = tabs.findIndex(t => t.id === tab.id)
+                  if (fromIndex === -1 || toIndex === -1) return
+
+                  reorderTabs(fromIndex, toIndex)
+                  setDragOverTabId(null)
+                }}
+                onDragEnd={() => {
+                  setDraggedTabId(null)
+                  setDragOverTabId(null)
+                }}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-t border border-b-0 transition-all cursor-pointer group/tab whitespace-nowrap min-w-max ${
                   activeTabId === tab.id
                     ? 'bg-neutral-700 border-neutral-600 text-white shadow-md'
                     : 'bg-neutral-800 border-neutral-700 text-neutral-400 hover:bg-neutral-750 hover:border-neutral-600 hover:text-neutral-300'
-                }`}
+                } ${draggedTabId === tab.id ? 'opacity-50' : ''} ${dragOverTabId === tab.id ? 'border-orange-500' : ''}`}
                 onClick={() => handleTabClick(tab.id, tab.url)}
               >
                 {/* Tab Icon/Number */}
@@ -179,6 +224,27 @@ export function TabsBar() {
                 <RotateCcw className="w-3 h-3" />
                 Reload Tab
               </div>
+            </button>
+            <div className="border-t border-neutral-600 my-1" />
+            <button
+              onClick={() => {
+                handleMoveTab(contextMenuTab, 'left')
+                closeContextMenu()
+              }}
+              className="block w-full text-left px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-600/70 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={tabs.findIndex(t => t.id === contextMenuTab) <= 0}
+            >
+              Move Left
+            </button>
+            <button
+              onClick={() => {
+                handleMoveTab(contextMenuTab, 'right')
+                closeContextMenu()
+              }}
+              className="block w-full text-left px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-600/70 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={tabs.findIndex(t => t.id === contextMenuTab) >= tabs.length - 1}
+            >
+              Move Right
             </button>
             <div className="border-t border-neutral-600 my-1" />
             <button
